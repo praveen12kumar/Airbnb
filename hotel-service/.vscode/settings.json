@@ -1,0 +1,26 @@
+{
+    // Enable ESLint for real-time linting
+    "eslint.enable": true,
+
+    // Validate these file types
+    "eslint.validate": ["javascript", "typescript"],
+
+    // Use the flat config format (eslint.config.ts)
+    "eslint.useFlatConfig": true,
+
+    // Set Prettier as the default formatter
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+    // Auto-format on save
+    "editor.formatOnSave": true,
+
+    // Run ESLint auto-fix on save
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    // TypeScript-specific settings
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}
