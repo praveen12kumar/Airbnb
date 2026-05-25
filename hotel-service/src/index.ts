@@ -4,6 +4,7 @@ import express from 'express';
 
 import logger from './config/logger';
 import { serverConfig } from './config/serverConfig';
+import sequelize from './db/models/sequelize';
 import { attactCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { genericErrorHandler } from './middlewares/ErrorMiddleware';
 import apiRouter from './routes';
@@ -26,8 +27,10 @@ app.use('/api', apiRouter);
 app.use(genericErrorHandler);
 
 // Start server
-app.listen(serverConfig.PORT, () => {
+app.listen(serverConfig.PORT, async () => {
     logger.info('Server is running on port', { PORT: serverConfig.PORT });
+    await sequelize.authenticate();
+    logger.info('Connection has been established successfully.');
 });
 
 export default app;

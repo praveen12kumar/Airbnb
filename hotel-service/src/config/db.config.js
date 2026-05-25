@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-
 const config = {
     development: {
         username: process.env.DB_USER,
@@ -12,6 +11,4 @@ const config = {
     },
 };
 
-
 export default config;
-
