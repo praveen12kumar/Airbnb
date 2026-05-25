@@ -25,3 +25,19 @@ export async function getHotelByIdHandler(req: Request, res: Response) {
         success: true,
     });
 }
+
+
+export async function getAllHotelHandler(req: Request, res: Response) {
+    res.status(501)
+};
+
+
+export async function deleteHotelHandler(req: Request, res: Response) {
+    res.status(501)
+};
+
+
+export async function updateHotelHandler(req: Request, res: Response) {
+    res.status(501)
+};
+
