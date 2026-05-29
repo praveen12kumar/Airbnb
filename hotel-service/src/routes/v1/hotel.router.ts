@@ -1,12 +1,21 @@
 import exress from 'express';
 
-import { createHotelHandler, getHotelByIdHandler } from '../../controllers/hotel.controller';
+import {
+    createHotelHandler,
+    deleteHotelHandler,
+    getAllHotelHandler,
+    getHotelByIdHandler,
+    updateHotelHandler,
+} from '../../controllers/hotel.controller';
 import { validateRequestBody } from '../../validators';
-import { hotelSchema } from '../../validators/hotel.validator';
+import { hotelSchema, updateHotelSchema } from '../../validators/hotel.validator';
 
 const hotelRouter = exress.Router();
 
 hotelRouter.post('/', validateRequestBody(hotelSchema), createHotelHandler);
+hotelRouter.get('/', getAllHotelHandler);
 hotelRouter.get('/:id', getHotelByIdHandler);
+hotelRouter.put('/:id', validateRequestBody(updateHotelSchema), updateHotelHandler);
+hotelRouter.delete('/:id', deleteHotelHandler);
 
 export default hotelRouter;

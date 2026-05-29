@@ -15,6 +15,7 @@ class Hotel extends Model<InferAttributes<Hotel>, InferCreationAttributes<Hotel>
     declare location: string;
     declare created_at: CreationOptional<Date>;
     declare updated_at: CreationOptional<Date>;
+    declare deleted_at: CreationOptional<Date | null>;
     declare rating?: number;
     declare ratingCount?: number;
 }
@@ -45,6 +46,10 @@ Hotel.init(
         updated_at: {
             type: DataTypes.DATE,
             defaultValue: new Date(),
+        },
+        deleted_at: {
+            type: DataTypes.DATE,
+            defaultValue: null,
         },
         rating: {
             type: DataTypes.INTEGER,
