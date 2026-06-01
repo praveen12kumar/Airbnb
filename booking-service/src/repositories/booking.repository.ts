@@ -20,7 +20,6 @@ export async function createIdempotencyKey(key: string, bookingId: number) {
   return idempotencyKey;
 }
 
-
 export async function getIdempotencyKey(key: string) {
   const idempotencyKey = await prisma.idempotencyKey.findUnique({
     where: { key },
