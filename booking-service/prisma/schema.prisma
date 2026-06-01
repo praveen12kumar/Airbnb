@@ -20,17 +20,18 @@ model Booking {
   updatedAt         DateTime      @updatedAt  // update the new updated value everytime we update
   bookingAmount     Int 
   status            BookingStatus @default(PENDING)
-  totalGuest        Int 
-  idempotencyKeyId  Int?          @unique
-  idempotencyKey    IdempotencyKey? @relation(fields: [idempotencyKeyId], references:[id])
+  totalGuests        Int 
+  idempotencyKey    IdempotencyKey? // forign key 
 }
 
 model IdempotencyKey{
-  id          Int     @id @default(autoincrement())
-  key         String  @unique // uuid 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  booking     Booking?      // optionally associated to booking
+  id          Int       @id @default(autoincrement())
+  key         String    @unique // uuid 
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  finalized   Boolean   @default(false)
+  bookingId   Int       @unique
+  booking     Booking   @relation(fields: [bookingId], references:[id])
 }
 
 
