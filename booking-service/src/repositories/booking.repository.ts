@@ -1,5 +1,8 @@
 import { prisma } from "../config/prisma";
 import { Prisma } from "../generated/prisma/client";
+import { validate as isValidUUID } from "uuid";
+import { BadRequestError, NotFoundError } from "../utils/errors/app.error";
+import { IdempotencyKey } from "../generated/prisma/client";
 
 export async function createBooking(bookingData: Prisma.BookingCreateInput) {
   const booking = await prisma.booking.create({
@@ -11,7 +14,7 @@ export async function createBooking(bookingData: Prisma.BookingCreateInput) {
 export async function createIdempotencyKey(key: string, bookingId: number) {
   const idempotencyKey = await prisma.idempotencyKey.create({
     data: {
-      key,
+      idemkey: key,
       booking: {
         connect: { id: bookingId },
       },
@@ -20,11 +23,24 @@ export async function createIdempotencyKey(key: string, bookingId: number) {
   return idempotencyKey;
 }
 
-export async function getIdempotencyKey(key: string) {
-  const idempotencyKey = await prisma.idempotencyKey.findUnique({
-    where: { key },
-  });
-  return idempotencyKey;
+export async function getIdempotencyKeyWithLock(
+  key: string,
+  txn: Prisma.TransactionClient,
+) {
+  if (!isValidUUID(key)) {
+    throw new BadRequestError("Invalid idempotency key format");
+  }
+
+  const idempotencyKey: Array<IdempotencyKey> = await txn.$queryRaw`
+    SELECT * FROM IdempotencyKey
+    WHERE idemkey = ${key}
+    FOR UPDATE
+  ;`;
+
+  if (!idempotencyKey || idempotencyKey.length === 0) {
+    throw new NotFoundError("Idempotency key not found");
+  }
+  return idempotencyKey[0];
 }
 
 export async function getBookingById(bookingId: number) {
@@ -34,8 +50,7 @@ export async function getBookingById(bookingId: number) {
   return booking;
 }
 
-
-// export async function changeBookingStatus(bookingId: number, 
+// export async function changeBookingStatus(bookingId: number,
 //         status: Prisma.EnumBookingStatusFieldUpdateOperationsInput
 //       ) {
 //   const booking = await prisma.booking.update({
@@ -46,41 +61,45 @@ export async function getBookingById(bookingId: number) {
 // }
 
 /**
- *  Problems  
+ *  Problems
  * ticket: pending --> confirmed  --> cancelled
  * ticket: pending --> cancelled
- * This function can change the status of a booking to either confirmed or cancelled, 
+ * This function can change the status of a booking to either confirmed or cancelled,
  * but it does not enforce the valid state transitions.
- * 
+ *
  * Solution
  * To enforce valid state transitions, we can implement a check before updating the booking status.
  */
 
-
-
-export async function confirmBookingStatus(bookingId: number) {
-  const booking = await prisma.booking.update({
-    where: {id: bookingId},
-    data:{
-      status: "CONFIRMED"
-    }
-  })
+export async function confirmBookingStatus(
+  txn: Prisma.TransactionClient,
+  bookingId: number,
+) {
+  const booking = await txn.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: "CONFIRMED",
+    },
+  });
   return booking;
 }
 
 export async function cancelBookingStatus(bookingId: number) {
   const booking = await prisma.booking.update({
-    where: {id: bookingId},
-    data:{
-      status: "CANCELLED"
-    }
-  })
+    where: { id: bookingId },
+    data: {
+      status: "CANCELLED",
+    },
+  });
   return booking;
 }
 
-export async function finalizeIdempotencyKey(key: string) {
-  const idempotencyKey = await prisma.idempotencyKey.update({
-    where: { key },
+export async function finalizeIdempotencyKey(
+  txn: Prisma.TransactionClient,
+  key: string,
+) {
+  const idempotencyKey = await txn.idempotencyKey.update({
+    where: { idemkey: key },
     data: { finalized: true },
   });
   return idempotencyKey;

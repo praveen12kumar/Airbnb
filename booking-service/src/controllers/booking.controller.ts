@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { confirmBookingService, createBookingService } from "../services/booking.service";
+import {
+  confirmBookingService,
+  createBookingService,
+} from "../services/booking.service";
 import statusCode from "http-status-codes";
 
 export const createBookingHandler = async (req: Request, res: Response) => {
@@ -19,15 +22,13 @@ export const createBookingHandler = async (req: Request, res: Response) => {
   });
 };
 
-
 export const confirmBookingHandler = async (req: Request, res: Response) => {
-    const { idempotencyKey } = req.params;
+  const { idempotencyKey } = req.params;
+  const booking = await confirmBookingService(idempotencyKey);
 
-    const booking = await confirmBookingService(idempotencyKey);
-
-    res.status(statusCode.CREATED).json({
-        success: true,
-        data: booking,
-        message: "Booking created successfully",
-    });
-}
+  res.status(statusCode.CREATED).json({
+    success: true,
+    data: booking,
+    message: "Booking created successfully",
+  });
+};
