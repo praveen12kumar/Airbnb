@@ -22,7 +22,7 @@ export const createBookingHandler = async (req: Request, res: Response) => {
   });
 };
 
-export const confirmBookingHandler = async (req: Request, res: Response) => {
+export const confirmBookingHandler = async (req: Request<{idempotencyKey: string}>, res: Response) => {
   const { idempotencyKey } = req.params;
   const booking = await confirmBookingService(idempotencyKey);
 
